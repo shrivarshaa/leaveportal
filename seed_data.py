@@ -21,6 +21,7 @@ def seed_data():
             password="pwd",
             role="student",
             sub_role="hosteller",
+            parent_phone="+919486783749",
             attendance_percentage=100,
             days_present=85,
             days_absent=0
@@ -84,6 +85,20 @@ def seed_data():
         db.add(demo_mentor)
         db.commit()
         db.refresh(demo_mentor)
+        
+    # Create parent demo user
+    demo_parent = db.query(User).filter(User.username == "parent123").first()
+    if not demo_parent:
+        demo_parent = User(
+            username="parent123",
+            email="parent@test.com",
+            password="pwd",
+            role="parent",
+            parent_phone="+919486783749"
+        )
+        db.add(demo_parent)
+        db.commit()
+        db.refresh(demo_parent)
         
     demo_dayscholar = db.query(User).filter(User.username == "dayscholar1").first()
     if not demo_dayscholar:
