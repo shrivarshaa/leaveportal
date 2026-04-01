@@ -1,6 +1,6 @@
-database:
-  name: leave-db
-  plan: free
+databases:
+  - name: leave-db
+    plan: free
 
 services:
   - type: web
