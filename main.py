@@ -140,12 +140,13 @@ async def create_leave(
     db.commit()
     db.refresh(db_leave)
 
-    # Notify faculty since leave is officially submitted
+    # Notify parent since leave is officially submitted
     send_leave_sms(
         student_name=student.username,
         start_date=start_date,
         end_date=end_date,
-        reason=reason
+        reason=reason,
+        to_phone=student.parent_phone  # Send to the actual parent phone
     )
 
     return db_leave
