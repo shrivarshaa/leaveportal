@@ -90,16 +90,10 @@ async def create_leave(
 
     lt_lower = leave_type.lower()
     
-    if lt_lower == "casual":
-        statusStr = "pending_mentor"
-    elif lt_lower == "od":
-        statusStr = "pending_incharge"
-    elif lt_lower == "medical":
-        statusStr = "pending_mentor"
-    elif lt_lower in ["emergency", "sick"]:
+    if lt_lower == "emergency":
         statusStr = "pending_warden"
     else:
-        statusStr = "pending_mentor"
+        statusStr = "pending_parent"
 
     attachment_path = None
     if file:
