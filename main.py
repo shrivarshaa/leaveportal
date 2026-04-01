@@ -461,4 +461,8 @@ def mark_absent(background_tasks: BackgroundTasks, student_id: int = Form(...), 
         
     return {"message": "Success", "attendance_percentage": student.attendance_percentage}
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Absolute path to the static directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+static_path = os.path.join(BASE_DIR, "static")
+
+app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
