@@ -411,23 +411,6 @@
         </div>
     </div>
 
-    <!-- OTP Verification Modal -->
-    <div id="otp-modal" class="modal-overlay hidden" style="z-index: 3000;">
-        <div class="modal-content glass-panel shadow-pop" style="max-width: 400px; text-align: center;">
-            <h3 style="margin-top: 0; color: var(--primary);">Parent Verification</h3>
-            <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.5; margin-bottom: 1.5rem;">
-                An OTP has just been sent to your parent's mobile number via SMS. Please enter it below to confirm your leave request.
-            </p>
-            <form id="otp-form" style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
-                <input type="hidden" id="otp-leave-id">
-                <input type="text" id="otp-input" placeholder="4-Digit OTP" maxlength="4" required style="font-size: 1.5rem; text-align: center; letter-spacing: 0.5rem; max-width: 250px; background: rgba(0,0,0,0.4); border: 1px solid var(--primary); color: white;">
-                <div style="display: flex; justify-content: center; gap: 1rem; width: 100%; margin-top: 1rem;">
-                    <button type="button" class="btn btn-secondary" style="background: rgba(255,255,255,0.1); color: white; padding: 0.75rem 1rem; border-radius: 8px; border: none; cursor: pointer;" onclick="closeOtpModal()">Enter Later</button>
-                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 0.75rem 1rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Verify & Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script src="app.js?v=8"></script>
 </body>

@@ -351,12 +351,7 @@ document.getElementById('leave-form').addEventListener('submit', async (e) => {
         // Reset form
         e.target.reset();
         
-        // Refresh table or pop up OTP
-        if (savedLeave.status === 'pending_otp') {
-            window.openOtpModal(savedLeave.id);
-        } else {
-            fetchStudentHistory();
-        }
+        fetchStudentHistory();
     } catch (err) {
         alert(err.message);
     }
@@ -387,7 +382,6 @@ async function fetchStudentHistory() {
                 <td>${leave.reason}</td>
                 <td>
                     ${formatStatusBadge(leave)}
-                    ${leave.status === 'pending_otp' ? `<br><button class="btn btn-primary" style="margin-top:0.5rem; font-size:0.75rem; padding: 0.25rem 0.5rem;" onclick="openOtpModal(${leave.id})">Enter OTP</button>` : ''}
                     ${leave.status.startsWith('pending_') ? `<span style="color: var(--danger); font-size: 1.1rem; cursor: pointer; font-weight: bold; margin-left: 8px;" onclick="cancelLeave(${leave.id})" title="Cancel Request">&#10006;</span>` : ''}
                 </td>
             `;
@@ -883,12 +877,7 @@ window.showLeaveDetails = function(leave) {
             }
         } else {
             // It's currently pending somewhere
-            if (pendingRole === 'otp') {
-                nodeClass = 'pending';
-                statusText = 'Waiting';
-                bodyText = 'Awaiting SMS OTP Verification';
-                reachedPending = true;
-            } else if (step.role === pendingRole) {
+            if (step.role === pendingRole) {
                 nodeClass = 'pending';
                 statusText = 'Current Stage';
                 bodyText = 'Action required from ' + step.label;
@@ -1017,49 +1006,4 @@ window.closeParentModals = function() {
     currentParentLeaveId = null;
     document.getElementById('parent-approve-modal').classList.add('hidden');
     document.getElementById('parent-reject-modal').classList.add('hidden');
-}
-
-window.openOtpModal = function(leaveId) {
-    document.getElementById('otp-leave-id').value = leaveId;
-    document.getElementById('otp-input').value = '';
-    document.getElementById('otp-modal').classList.remove('hidden');
-}
-
-window.closeOtpModal = function() {
-    document.getElementById('otp-modal').classList.add('hidden');
-    fetchStudentHistory(); // Reload table after closing to update statuses
-}
-
-const otpForm = document.getElementById('otp-form');
-if (otpForm) {
-    otpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const leaveId = document.getElementById('otp-leave-id').value;
-        const otp = document.getElementById('otp-input').value;
-        
-        if (!otp || otp.length !== 4) {
-            return alert("Please enter the full 4-digit OTP.");
-        }
-        
-        const formData = new FormData();
-        formData.append('user_id', currentUser.id);
-        formData.append('otp', otp);
-        
-        try {
-            const response = await fetch(`${API_URL}/leave/${leaveId}/verify_otp`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.detail || "Invalid OTP or network error");
-            }
-            
-            alert("Leave verified and submitted successfully!");
-            window.closeOtpModal();
-        } catch(err) {
-            alert(err.message);
-        }
-    });
 }

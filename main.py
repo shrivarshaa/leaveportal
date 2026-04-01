@@ -9,10 +9,7 @@ from sms_service import send_leave_sms, send_otp_sms, send_silent_leave_sms
 from database import engine, get_db
 from sqlalchemy import func
 
-PENDING_OTPS = {}
 
-def generate_otp():
-    return "".join(random.choices(string.digits, k=4))
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -93,10 +90,16 @@ async def create_leave(
 
     lt_lower = leave_type.lower()
     
-    if lt_lower == "emergency":
+    if lt_lower == "casual":
+        statusStr = "pending_mentor"
+    elif lt_lower == "od":
+        statusStr = "pending_incharge"
+    elif lt_lower == "medical":
+        statusStr = "pending_mentor"
+    elif lt_lower in ["emergency", "sick"]:
         statusStr = "pending_warden"
     else:
-        statusStr = "pending_otp"
+        statusStr = "pending_mentor"
 
     attachment_path = None
     if file:
@@ -130,83 +133,16 @@ async def create_leave(
     db.commit()
     db.refresh(db_leave)
 
-    if statusStr == "pending_otp":
-        otp = generate_otp()
-        PENDING_OTPS[db_leave.id] = otp
-        print(f"\n[SECURITY LOG] Generated Parent OTP for {student.username}: {otp}\n")
-        
-        otp_log_path = os.path.join("/tmp", "latest_otp.txt") if os.environ.get("VERCEL") else "latest_otp.txt"
-        with open(otp_log_path, "w") as f:
-            f.write(f"The most recent Leave OTP for {student.username} is: {otp}\n")
-        
-        # Send SMS synchronously (BackgroundTasks freeze on serverless)
-        send_otp_sms(
-            student_name=student.username,
-            otp_code=otp,
-            to_phone=student.parent_phone
-        )
-    else:
-        # Send SMS synchronously
-        send_leave_sms(
-            student_name=student.username,
-            start_date=start_date,
-            end_date=end_date,
-            reason=reason,
-            to_phone=student.parent_phone
-        )
-
-    return db_leave
-
-@app.post("/leave/{leave_id}/verify_otp", response_model=schemas.LeaveRequestResponse)
-async def verify_otp(
-    leave_id: int, 
-    user_id: int = Form(...), 
-    otp: str = Form(...), 
-    background_tasks: BackgroundTasks = BackgroundTasks(),
-    db: Session = Depends(get_db)
-):
-    leave = db.query(models.LeaveRequest).filter(models.LeaveRequest.id == leave_id).first()
-    if not leave or leave.student_id != user_id:
-        raise HTTPException(status_code=404, detail="Leave not found")
-        
-    if leave.status != "pending_otp":
-        raise HTTPException(status_code=400, detail="Leave is not pending OTP")
-        
-    expected_otp = PENDING_OTPS.get(leave_id)
-    if not expected_otp or expected_otp != otp:
-        raise HTTPException(status_code=400, detail="Invalid OTP")
-        
-    # Promote status past parent to actual approver
-    leave_type = leave.leave_type.lower()
-    if leave_type == "casual":
-        leave.status = "pending_mentor"
-    elif leave_type == "od":
-        leave.status = "pending_incharge"
-    elif leave_type == "medical":
-        leave.status = "pending_mentor"
-    elif leave_type in ["emergency", "sick"]:
-        leave.status = "pending_warden"
-    else:
-        leave.status = "pending_mentor"
-        
-    db.commit()
-    db.refresh(leave)
-    
-    # Remove OTP from memory
-    if leave_id in PENDING_OTPS:
-        del PENDING_OTPS[leave_id]
-    
     # Notify faculty since leave is officially submitted
-    student = db.query(models.User).filter(models.User.id == user_id).first()
     send_leave_sms(
         student_name=student.username,
-        start_date=leave.start_date,
-        end_date=leave.end_date,
-        reason=leave.reason,
+        start_date=start_date,
+        end_date=end_date,
+        reason=reason,
         to_phone=student.parent_phone
     )
-    
-    return leave
+
+    return db_leave
 
 @app.get("/leaves", response_model=list[schemas.LeaveRequestResponse])
 def get_leaves(user_id: int, db: Session = Depends(get_db)):
