@@ -138,8 +138,7 @@ async def create_leave(
         student_name=student.username,
         start_date=start_date,
         end_date=end_date,
-        reason=reason,
-        to_phone=student.parent_phone
+        reason=reason
     )
 
     return db_leave
