@@ -141,6 +141,7 @@ async def create_leave(
     db.refresh(db_leave)
 
     # Notify parent since leave is officially submitted
+    print(f"DEBUG: Attempting to notify parent for student {student.username}. Parent Phone: {student.parent_phone}")
     send_leave_sms(
         student_name=student.username,
         start_date=start_date,
