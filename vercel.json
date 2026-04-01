@@ -1,3 +1,24 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+  "rewrites": [
+    {
+      "source": "/style.css",
+      "destination": "/static/style.css"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/static/app.js"
+    },
+    {
+      "source": "/",
+      "destination": "/static/index.html"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "/static/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
+  ]
 }

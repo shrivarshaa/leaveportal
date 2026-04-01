@@ -3,9 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# Absolute path to the database directory (root)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "leaves_v2.db")
+# Use /tmp/ for serverless writable access on Vercel
+import os
+db_path = os.path.join("/tmp", "leaves_v2.db")
+if not os.environ.get("VERCEL"):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(BASE_DIR, "leaves_v2.db")
+
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
 
 engine = create_engine(

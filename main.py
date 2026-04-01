@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 import models, schemas, shutil, os, datetime, string, random
@@ -93,10 +94,20 @@ async def create_leave(
     if file:
         file_ext = os.path.splitext(file.filename)[1]
         file_name = f"proof_{student_id}_{int(datetime.datetime.now().timestamp())}{file_ext}"
-        upload_path = os.path.join("static", "uploads", file_name)
+        
+        if os.environ.get("VERCEL"):
+            upload_dir = os.path.join("/tmp", "uploads")
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            upload_dir = os.path.join(base_dir, "static", "uploads")
+            
+        os.makedirs(upload_dir, exist_ok=True)
+        upload_path = os.path.join(upload_dir, file_name)
+        
         with open(upload_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         attachment_path = f"/uploads/{file_name}"
+
 
     db_leave = models.LeaveRequest(
         student_id=student_id,
@@ -116,7 +127,8 @@ async def create_leave(
         PENDING_OTPS[db_leave.id] = otp
         print(f"\n[SECURITY LOG] Generated Parent OTP for {student.username}: {otp}\n")
         
-        with open("latest_otp.txt", "w") as f:
+        otp_log_path = os.path.join("/tmp", "latest_otp.txt") if os.environ.get("VERCEL") else "latest_otp.txt"
+        with open(otp_log_path, "w") as f:
             f.write(f"The most recent Leave OTP for {student.username} is: {otp}\n")
         
         background_tasks.add_task(
@@ -461,8 +473,17 @@ def mark_absent(background_tasks: BackgroundTasks, student_id: int = Form(...), 
         
     return {"message": "Success", "attendance_percentage": student.attendance_percentage}
 
-# Absolute path to the static directory
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-static_path = os.path.join(BASE_DIR, "static")
+@app.get("/uploads/{filename}")
+async def get_upload_file(filename: str):
+    if os.environ.get("VERCEL"):
+        upload_dir = os.path.join("/tmp", "uploads")
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        upload_dir = os.path.join(base_dir, "static", "uploads")
+        
+    file_path = os.path.join(upload_dir, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="File not found")
 
-app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
+
