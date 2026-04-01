@@ -1,11 +1,6 @@
 import datetime
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from models import User, LeaveRequest
-from database import Base, SQLALCHEMY_DATABASE_URL
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from database import Base, engine, SessionLocal
 
 def seed_data():
     db = SessionLocal()
