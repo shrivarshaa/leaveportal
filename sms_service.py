@@ -14,12 +14,21 @@ def send_leave_sms(student_name: str, start_date: str, end_date: str, reason: st
     auth_token = os.getenv("TWILIO_AUTH_TOKEN", "6cb95ff995c84d8bee0acef2becebb75")
     from_phone = os.getenv("TWILIO_PHONE_NUMBER", "+12602613182")
     
-    # If a specific recipient is not provided, fallback to the environment variable or your specific number
+    # If a specific recipient is not provided, fallback
     if not to_phone:
         to_phone = os.getenv("FACULTY_PHONE_NUMBER", "+919486783749")
         
+    # Ensure phone number is in E.164 format (starts with +)
+    # Default to +91 if it's a 10-digit number
+    if to_phone:
+        to_phone = to_phone.strip()
+        if len(to_phone) == 10 and to_phone.isdigit():
+            to_phone = f"+91{to_phone}"
+        elif not to_phone.startswith("+"):
+            to_phone = f"+{to_phone}"
+            
     if not all([account_sid, auth_token, from_phone, to_phone]):
-        logger.warning("Twilio SMS not sent: Missing one or more required environment variables (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, FACULTY_PHONE_NUMBER).")
+        logger.warning(f"Twilio SMS not sent: Missing env vars. SID: {'Yes' if account_sid else 'No'}, Token: {'Yes' if auth_token else 'No'}, From: {from_phone}, To: {to_phone}")
         return False
         
     message_body = (
@@ -31,6 +40,7 @@ def send_leave_sms(student_name: str, start_date: str, end_date: str, reason: st
     )
 
     try:
+        logger.info(f"Attempting to send SMS to {to_phone} using Twilio SID {account_sid[:5]}...")
         client = Client(account_sid, auth_token)
         message = client.messages.create(
             body=message_body,
@@ -40,7 +50,7 @@ def send_leave_sms(student_name: str, start_date: str, end_date: str, reason: st
         logger.info(f"Twilio SMS sent successfully. Message SID: {message.sid}")
         return True
     except Exception as e:
-        logger.error(f"Failed to send Twilio SMS: {e}")
+        logger.error(f"Failed to send Twilio SMS to {to_phone}: {e}")
         return False
 
 def send_otp_sms(student_name: str, otp_code: str, to_phone: str = None) -> bool:
