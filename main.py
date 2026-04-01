@@ -202,9 +202,29 @@ def leave_action(leave_id: int, user_id: int, action: str, remarks: Optional[str
         elif user.role == "parent": leave.parent_id = user.id
     elif action == "cancel":
         if user.role == "student" and user.id == leave.student_id and leave.status.startswith("pending_"):
+            student_data = schemas.UserResponse.from_orm(leave.student)
+            leave_id = leave.id
+            student_id = leave.student_id
+            leave_type = leave.leave_type
+            start_date = leave.start_date
+            end_date = leave.end_date
+            reason = leave.reason
+            created_at = leave.created_at
+            
             db.delete(leave)
             db.commit()
-            return {"id": leave.id, "student_id": leave.student_id, "leave_type": leave.leave_type, "start_date": leave.start_date, "end_date": leave.end_date, "reason": leave.reason, "status": "deleted", "created_at": leave.created_at}
+            
+            return {
+                "id": leave_id, 
+                "student_id": student_id, 
+                "leave_type": leave_type, 
+                "start_date": start_date, 
+                "end_date": end_date, 
+                "reason": reason, 
+                "status": "deleted", 
+                "created_at": created_at,
+                "student": student_data
+            }
         else:
             raise HTTPException(status_code=400, detail="Cannot cancel this leave")
     elif action == "approve":
