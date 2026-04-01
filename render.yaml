@@ -1,13 +1,16 @@
+database:
+  name: leave-db
+  plan: free
+
 services:
   - type: web
     name: leaveportal
+    plan: free
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
-    disk:
-      name: leave-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        value: sqlite:////data/leaves_v2.db
+        fromDatabase:
+          name: leave-db
+          property: connectionString
