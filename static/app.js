@@ -517,13 +517,15 @@ async function fetchApproverLeaves() {
                     <td>${formatDateTime(leave.start_date)} <br>to<br> ${formatDateTime(leave.end_date)}</td>
                     <td>${leave.reason}</td>
                     <td>
-                        ${currentUser.role === 'parent' ? `
-                            <button class="btn-approve" onclick="openParentApprove(${leave.id})">Approve</button>
-                            <button class="btn-reject" onclick="openParentReject(${leave.id})">Reject</button>
-                        ` : `
-                            <button class="btn-approve" onclick="actionLeave(${leave.id}, 'approve')">Approve</button>
-                            <button class="btn-reject" onclick="actionLeave(${leave.id}, 'reject')">Reject</button>
-                        `}
+                        <div class="action-buttons">
+                            ${currentUser.role === 'parent' ? `
+                                <button class="btn-approve" onclick="openParentApprove(${leave.id})">Approve</button>
+                                <button class="btn-reject" onclick="openParentReject(${leave.id})">Reject</button>
+                            ` : `
+                                <button class="btn-approve" onclick="actionLeave(${leave.id}, 'approve')">Approve</button>
+                                <button class="btn-reject" onclick="actionLeave(${leave.id}, 'reject')">Reject</button>
+                            `}
+                        </div>
                     </td>
                 `;
                 pendingTbody.appendChild(tr);
