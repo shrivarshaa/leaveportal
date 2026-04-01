@@ -139,18 +139,20 @@ async def create_leave(
         with open(otp_log_path, "w") as f:
             f.write(f"The most recent Leave OTP for {student.username} is: {otp}\n")
         
-        background_tasks.add_task(
-            send_otp_sms,
+        # Send SMS synchronously (BackgroundTasks freeze on serverless)
+        send_otp_sms(
             student_name=student.username,
-            otp_code=otp
+            otp_code=otp,
+            to_phone=student.parent_phone
         )
     else:
-        background_tasks.add_task(
-            send_leave_sms,
+        # Send SMS synchronously
+        send_leave_sms(
             student_name=student.username,
             start_date=start_date,
             end_date=end_date,
-            reason=reason
+            reason=reason,
+            to_phone=student.parent_phone
         )
 
     return db_leave
@@ -196,12 +198,12 @@ async def verify_otp(
     
     # Notify faculty since leave is officially submitted
     student = db.query(models.User).filter(models.User.id == user_id).first()
-    background_tasks.add_task(
-        send_leave_sms,
+    send_leave_sms(
         student_name=student.username,
         start_date=leave.start_date,
         end_date=leave.end_date,
-        reason=leave.reason
+        reason=leave.reason,
+        to_phone=student.parent_phone
     )
     
     return leave
@@ -470,14 +472,14 @@ def mark_absent(background_tasks: BackgroundTasks, student_id: int = Form(...), 
     
     db.commit()
     
-    # Real Twilio SMS for Silent Leave Detection
-    background_tasks.add_task(
-        send_silent_leave_sms,
-        student_name=student.username
+    # Real Twilio SMS synchronously
+    send_silent_leave_sms(
+        student_name=student.username,
+        to_phone=student.parent_phone
     )
     
     # Local terminal log for demo
-    print(f"\n--- [SILENT LEAVE SMS TASKED to {student.username}] ---")
+    print(f"\n--- [SILENT LEAVE SMS SENT to {student.username}] ---")
         
     return {"message": "Success", "attendance_percentage": student.attendance_percentage}
 
