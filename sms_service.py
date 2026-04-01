@@ -11,7 +11,7 @@ def send_leave_sms(student_name: str, start_date: str, end_date: str, reason: st
     Uses environment variables for configuration.
     """
     account_sid = os.getenv("TWILIO_ACCOUNT_SID", "ACb417aacbd8bb03d74eec9c13a1ec51fd")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "6cb95ff995c84d8bee0acef2becebb75")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "cc86bef3032402a837cf3e980484a391")
     from_phone = os.getenv("TWILIO_PHONE_NUMBER", "+12602613182")
     
     # If a specific recipient is not provided, fallback
@@ -58,7 +58,7 @@ def send_otp_sms(student_name: str, otp_code: str, to_phone: str = None) -> bool
     Sends an OTP SMS to the parent.
     """
     account_sid = os.getenv("TWILIO_ACCOUNT_SID", "ACb417aacbd8bb03d74eec9c13a1ec51fd")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "6cb95ff995c84d8bee0acef2becebb75")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "cc86bef3032402a837cf3e980484a391")
     from_phone = os.getenv("TWILIO_PHONE_NUMBER", "+12602613182")
     
     if not to_phone:
@@ -92,7 +92,7 @@ def send_silent_leave_sms(student_name: str, to_phone: str = None) -> bool:
     Sends an SMS to the parent when a student is marked absent without leave.
     """
     account_sid = os.getenv("TWILIO_ACCOUNT_SID", "ACb417aacbd8bb03d74eec9c13a1ec51fd")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "6cb95ff995c84d8bee0acef2becebb75")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "cc86bef3032402a837cf3e980484a391")
     from_phone = os.getenv("TWILIO_PHONE_NUMBER", "+12602613182")
     
     if not to_phone:
