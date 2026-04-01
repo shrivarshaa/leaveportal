@@ -18,6 +18,14 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+try:
+    if os.environ.get("VERCEL"):
+        from seed_data import seed_data
+        print("Vercel ephemeral environment detected - Seeding database synchronously...")
+        seed_data()
+except Exception as e:
+    print(f"Error seeding database: {e}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
