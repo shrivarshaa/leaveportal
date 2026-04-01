@@ -1,6 +1,7 @@
-fastapi
-uvicorn
+python-multipart
+gunicorn
+twilio
 sqlalchemy
 pydantic
-twilio
-gunicorn
+fastapi
+uvicorn
