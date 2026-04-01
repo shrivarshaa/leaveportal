@@ -91,30 +91,20 @@ showLoginBtn.addEventListener('click', () => {
 // Dynamic role selection for register
 const regRoleSelect = document.getElementById('reg-role');
 const regSubroleGroup = document.getElementById('reg-subrole-group');
-const regParentGroup = document.getElementById('reg-parent-group');
 
 regRoleSelect.addEventListener('change', (e) => {
     const role = e.target.value;
     if (role === 'student') {
         regSubroleGroup.classList.remove('hidden');
-        regParentGroup.classList.remove('hidden');
-        document.getElementById('reg-parent-phone').placeholder = "Parent's Phone Number (for SMS)";
         document.getElementById('reg-subrole').required = true;
-        document.getElementById('reg-parent-phone').required = true;
     } else if (role === 'parent') {
         regSubroleGroup.classList.add('hidden');
-        regParentGroup.classList.remove('hidden');
-        document.getElementById('reg-parent-phone').placeholder = "Your Phone Number";
         document.getElementById('reg-subrole').required = false;
-        document.getElementById('reg-parent-phone').required = true;
         document.getElementById('reg-subrole').value = '';
     } else {
         regSubroleGroup.classList.add('hidden');
-        regParentGroup.classList.add('hidden');
         document.getElementById('reg-subrole').required = false;
-        document.getElementById('reg-parent-phone').required = false;
         document.getElementById('reg-subrole').value = '';
-        document.getElementById('reg-parent-phone').value = '';
     }
 });
 
@@ -163,13 +153,12 @@ registerForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('reg-password').value.trim();
     const role = document.getElementById('reg-role').value;
     const sub_role = document.getElementById('reg-subrole').value;
-    const parent_phone = document.getElementById('reg-parent-phone').value.trim();
 
     try {
         const response = await fetch(`${API_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password, role, sub_role, parent_phone })
+            body: JSON.stringify({ username, email, password, role, sub_role })
         });
 
         if (!response.ok) {
