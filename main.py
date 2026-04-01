@@ -16,12 +16,16 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 try:
-    if os.environ.get("VERCEL"):
-        from seed_data import seed_data
-        print("Vercel ephemeral environment detected - Seeding database synchronously...")
+    from database import SessionLocal
+    from seed_data import seed_data
+    db = SessionLocal()
+    # Check if we have any users, if not, seed
+    if db.query(models.User).count() == 0:
+        print("Database empty - Seeding initial accounts...")
         seed_data()
+    db.close()
 except Exception as e:
-    print(f"Error seeding database: {e}")
+    print(f"Database check/seed failed: {e}")
 
 app.add_middleware(
     CORSMiddleware,
