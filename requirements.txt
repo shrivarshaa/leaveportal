@@ -5,4 +5,4 @@ sqlalchemy
 pydantic
 fastapi
 uvicorn
-pg8000
+psycopg2-binary
