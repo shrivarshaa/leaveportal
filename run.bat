@@ -1,0 +1,6 @@
+@echo off
+echo Installing dependencies...
+python -m pip install -r requirements.txt
+echo Starting Leave Portal Backend Server...
+uvicorn main:app --reload
+pause
