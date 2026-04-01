@@ -12,7 +12,7 @@ if not os.environ.get("VERCEL"):
     db_path = os.path.join(BASE_DIR, "leaves_v2.db")
 
 # Fallback to Supabase URL if deployed to Vercel without env vars set
-SUPABASE_URL = "postgresql://postgres:Varshaa1326%23@db.hodaapyjlfhngnrqyioh.supabase.co:5432/postgres"
+SUPABASE_URL = "postgresql+pg8000://postgres:Varshaa1326%23@db.hodaapyjlfhngnrqyioh.supabase.co:5432/postgres"
 
 # Use DATABASE_URL, fallback to Supabase on Vercel, or SQLite locally
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -21,6 +21,12 @@ if not SQLALCHEMY_DATABASE_URL:
         SQLALCHEMY_DATABASE_URL = SUPABASE_URL
     else:
         SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
+else:
+    # Ensure DATABASE_URL from Vercel env uses pg8000
+    if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
+    elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://") and "pg8000" not in SQLALCHEMY_DATABASE_URL:
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
 
 # Supabase / PostgreSQL doesn't use the check_same_thread argument
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
